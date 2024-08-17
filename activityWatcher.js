@@ -7,11 +7,12 @@ const { Client, Collection, GatewayIntentBits } = require('discord.js');
 
 // Define Client
 const client = new Client({
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates],
 	allowedMentions: { parse: [] },
 });
 
 // Define Collections
+client.cooldowns = new Collection();
 client.commands = new Collection();
 client.events = new Collection();
 
