@@ -7,7 +7,15 @@ const { Client, Collection, GatewayIntentBits } = require('discord.js');
 
 // Define Client
 const client = new Client({
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates],
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildPresences,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildVoiceStates,
+		GatewayIntentBits.GuildMessageReactions,
+	],
 	allowedMentions: { parse: [] },
 });
 
@@ -17,7 +25,7 @@ client.commands = new Collection();
 client.events = new Collection();
 
 // Client Constants
-client.color = '#3a3c56';
+client.color = '#63e5be';
 
 // Run Loaders
 client.mongoose = require('./core/loaders/mongooseLoader');

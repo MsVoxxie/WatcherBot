@@ -12,8 +12,6 @@ readdirSync('./commands/').forEach((dir) => {
 	const cmds = readdirSync(`./commands/${dir}/`).filter((file) => file.endsWith('.js'));
 	for (const file of cmds) {
 		const command = require(`./commands/${dir}/${file}`);
-		// command.data.integration_types = [0, 1, 2];
-		// command.data.contexts = [0, 1];
 		commands.push(command.data.toJSON());
 	}
 });
@@ -25,10 +23,6 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 (async () => {
 	try {
 		Logger.info(`Started refreshing ${commands.length} application (/) commands.`);
-		commands.map((c) => {
-			c.integration_types = [0, 1];
-			c.contexts = [0, 1, 2];
-		});
 
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
