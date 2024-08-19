@@ -4,6 +4,7 @@ dotenv.config();
 
 // Discord Classes
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
+const cron = require('node-cron');
 
 // Define Client
 const client = new Client({
@@ -33,3 +34,8 @@ require('./core/loaders/commandLoader')(client);
 require('./core/loaders/eventLoader')(client);
 
 client.login(process.env.DISCORD_TOKEN);
+
+// Every 30 minutes
+cron.schedule('*/30 * * * *', async () => {
+	client.emit('everyThirty');
+});

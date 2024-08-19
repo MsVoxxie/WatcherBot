@@ -18,8 +18,8 @@ module.exports = {
 		const checkedMember = interaction.guild.members.cache.get(checkedUser.id);
 
 		// Fetch oldest members from database
-		const inactiveUser = await watchedUsers.find({ guildId: interaction.guild.id, userId: checkedUser.id });
 		if (!inactiveUser.length) return interaction.reply('User has not been tracked yet.');
+		const inactiveUser = await watchedUsers.find({ guildId: interaction.guild.id, userId: checkedUser.id });
 
 		// Create the embed
 		const embed = new EmbedBuilder()
