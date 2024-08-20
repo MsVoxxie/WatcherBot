@@ -37,5 +37,5 @@ client.login(process.env.DISCORD_TOKEN);
 
 // Every 30 minutes
 cron.schedule('*/30 * * * *', async () => {
-	client.emit('everyThirty');
+	client.emit('updateActivity');
 });

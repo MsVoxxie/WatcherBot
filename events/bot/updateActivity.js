@@ -2,7 +2,7 @@ const { ActivityType } = require('discord.js');
 const watchedUsers = require('../../models/watchedUsers');
 
 module.exports = {
-	name: 'everyThirty',
+	name: 'updateActivity',
 	runType: 'single',
 	async execute(client) {
 		// Set presence

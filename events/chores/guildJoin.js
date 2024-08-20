@@ -30,6 +30,7 @@ module.exports = {
 		}
 		await watchedUsers.insertMany(memberData).then((ins) => {
 			console.log(`Added ${ins.length} members from guild ${guild.name} into the database`);
+			client.emit('updateActivity');
 		});
 	},
 };

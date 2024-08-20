@@ -14,6 +14,7 @@ module.exports = {
 		// Remove all guild entries from the database when the bot leaves a guild
 		await watchedUsers.deleteMany({ guildId: guild.id }).then((ins) => {
 			console.log(`Removed ${ins.deletedCount} members from guild ${guild.name} from the database`);
+			client.emit('updateActivity');
 		});
 	},
 };
