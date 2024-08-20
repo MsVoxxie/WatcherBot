@@ -12,8 +12,8 @@ module.exports = {
 		await new Promise((resolve) => setTimeout(resolve, 5000));
 
 		// Remove all guild entries from the database when the bot leaves a guild
-		await watchedUsers.deleteMany({ guildId: guild.id }).then(() => {
-			console.log(`Deleted all entries for guild ${guild.name}`);
+		await watchedUsers.deleteMany({ guildId: guild.id }).then((ins) => {
+			console.log(`Removed ${ins.deletedCount} members from guild ${guild.name} from the database`);
 		});
 	},
 };

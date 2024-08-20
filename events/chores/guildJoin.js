@@ -28,8 +28,8 @@ module.exports = {
 				lastAction: 'Initial Cache',
 			});
 		}
-		await watchedUsers.insertMany(memberData).then(() => {
-			console.log(`Added all members in guild ${guild.name} to the database`);
+		await watchedUsers.insertMany(memberData).then((ins) => {
+			console.log(`Added ${ins.length} members from guild ${guild.name} into the database`);
 		});
 	},
 };
