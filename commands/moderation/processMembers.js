@@ -4,7 +4,7 @@ const moment = require('moment');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('prune_members')
+		.setName('process_members')
 		.setDescription('Prune members from the server based on inactivity')
 		.addStringOption((option) =>
 			option
@@ -13,7 +13,13 @@ module.exports = {
 				.setRequired(true)
 				.addChoices({ name: 'One Day', value: '1d' }, { name: 'One Week', value: '1w' }, { name: 'One Month', value: '1m' }, { name: 'One Year', value: '1y' })
 		)
-
+		.addStringOption((option) =>
+			option
+				.setName('action')
+				.setDescription('The action to take on the inactive members')
+				.setRequired(true)
+				.addChoices({ name: 'Issue Warning', value: 'warn' }, { name: 'Kick Members', value: 'kick' })
+		)
 		.setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
 	options: {
 		devOnly: false,
@@ -27,6 +33,7 @@ module.exports = {
 
 		// Declarations
 		const time = interaction.options.getString('time');
+		const action = interaction.options.getString('action');
 
 		// Fetch inactive members from database
 		const inactiveUsers = await watchedUsers.find({ guildId: interaction.guild.id });
@@ -42,12 +49,12 @@ module.exports = {
 			const duration = moment.duration(timeValue, timeUnit);
 			return moment(user.lastInteraction).isBefore(moment().subtract(duration));
 		});
-		if (!inactiveMembers.length) return interaction.reply({ content: 'No inactive members found within the timeframe provided.', ephemeral: true });
+		if (!inactiveMembers.length) return interaction.reply({ content: 'No inactive members found within the timeframe provid ed.', ephemeral: true });
 
 		// Create confirmation embed
 		const embed = new EmbedBuilder()
 			.setTitle('Prune Members')
-			.setDescription(`Are you sure you want to prune **${inactiveMembers.length}** members?`)
+			.setDescription(`Are you sure you want to ${action === 'warn' ? '__warn__' : '__kick__'} **${inactiveMembers.length}** members for being inactive for **${time}**?`)
 			.setColor(client.color)
 			.setTimestamp();
 
@@ -73,9 +80,25 @@ module.exports = {
 						console.log(`Kicking ${member.user.username} for being inactive.\nLast Active ${moment(mem.lastInteraction).fromNow()}`);
 						// Confirm the member exists
 						if (!member) continue;
-						// Check if the member is kickable
-						if (member.kickable) {
-							// Kick here!
+						// Issue a warning
+						switch (action) {
+							case 'warn':
+								try {
+									// await member.send(`You have been inactive for too long in **${interaction.guild.name}** and may be kicked soon.`);
+								} catch (error) {
+									console.error(`Unable to send warning message to ${member.user.username}`);
+								}
+								break;
+							case 'kick':
+								if (member.kickable) {
+									// Kick here
+									try {
+										console.log(`Kicking ${member.user.username} for being inactive.\nLast Active ${moment(mem.lastInteraction).fromNow()}`);
+									} catch (error) {
+										console.error(`Unable to kick ${member.user.username}`);
+									}
+								}
+								break;
 						}
 					}
 
@@ -92,7 +115,7 @@ module.exports = {
 		// Handle the collector ending
 		collector.on('end', async () => {
 			// Update the embed to remove the buttons
-			await confirmEmbed.edit({ components: [] });
+			await confirmEmbed.edit({ components: [], embeds: [] });
 		});
 	},
 };

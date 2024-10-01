@@ -21,6 +21,9 @@ module.exports = {
 		const inactiveUser = await watchedUsers.find({ guildId: interaction.guild.id, userId: checkedUser.id });
 		if (!inactiveUser.length) return interaction.reply('User has not been tracked yet.');
 
+		console.log(checkedMember.member);
+		
+
 		// Create the embed
 		const embed = new EmbedBuilder()
 			.setTitle('User Activity')

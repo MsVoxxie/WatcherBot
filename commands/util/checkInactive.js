@@ -13,17 +13,21 @@ module.exports = {
 	},
 	async execute(client, interaction) {
 		// Fetch oldest members from database
-		const inactiveUsers = await watchedUsers.find({ guildId: interaction.guild.id }).sort({ lastInteraction: 1 }).limit(10);
+		const inactiveUsers = await watchedUsers.find({ guildId: interaction.guild.id }).sort({ lastInteraction: 1 });
 		if (!inactiveUsers.length) return interaction.reply('No inactive users found.');
+
+		// Limit to 10 users
+		const tenInactiveUsers = inactiveUsers.splice(0, 10);
 
 		// Create the embed
 		const embed = new EmbedBuilder()
 			.setTitle(`${interaction.guild.name}'s 10 Most Inactive Users`)
 			.setColor(client.color)
+			.setFooter({ text: `Total Inactive Users: ${inactiveUsers.length}` })
 			.setTimestamp()
 			.addFields({
 				name: 'Users',
-				value: inactiveUsers
+				value: tenInactiveUsers
 					.map((user) => {
 						const member = interaction.guild.members.cache.get(user.userId);
 						return `${member ? member : `<@${user.userId}`} **-** ${dateToRelative(user.lastInteraction)}`;
