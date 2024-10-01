@@ -19,11 +19,14 @@ module.exports = {
 		// Limit to 10 users
 		const tenInactiveUsers = inactiveUsers.splice(0, 10);
 
+		// Total guild members formatted with LocaleString
+		const totalGuildMembers = interaction.guild.members.cache.size.toLocaleString();
+
 		// Create the embed
 		const embed = new EmbedBuilder()
 			.setTitle(`${interaction.guild.name}'s 10 Most Inactive Users`)
 			.setColor(client.color)
-			.setFooter({ text: `Total Inactive Users: ${inactiveUsers.length}` })
+			.setFooter({ text: `Total Inactive Users: ${inactiveUsers.length} / ${totalGuildMembers}` })
 			.setTimestamp()
 			.addFields({
 				name: 'Users',
