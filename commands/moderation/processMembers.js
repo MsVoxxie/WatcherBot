@@ -49,7 +49,7 @@ module.exports = {
 			const duration = moment.duration(timeValue, timeUnit);
 			return moment(user.lastInteraction).isBefore(moment().subtract(duration));
 		});
-		if (!inactiveMembers.length) return interaction.reply({ content: 'No inactive members found within the timeframe provid ed.', ephemeral: true });
+		if (!inactiveMembers.length) return interaction.reply({ content: 'No inactive members found within the timeframe provided.', ephemeral: true });
 
 		// Create confirmation embed
 		const embed = new EmbedBuilder()
@@ -75,16 +75,20 @@ module.exports = {
 			switch (int.customId) {
 				case 'confirm':
 					// Kick the inactive members
-					for (const mem of inactiveMembers) {
+					for await (const mem of inactiveMembers) {
 						const member = members.get(mem.userId);
 						console.log(`Kicking ${member.user.username} for being inactive.\nLast Active ${moment(mem.lastInteraction).fromNow()}`);
+
+						// Wait to prevent rate limiting
+						await new Promise((resolve) => setTimeout(resolve, 2500));
+
 						// Confirm the member exists
 						if (!member) continue;
 						// Issue a warning
 						switch (action) {
 							case 'warn':
 								try {
-									// await member.send(`You have been inactive for too long in **${interaction.guild.name}** and may be kicked soon.`);
+									await member.send(`You have been inactive for too long in **${interaction.guild.name}** and may be kicked soon.`);
 								} catch (error) {
 									console.error(`Unable to send warning message to ${member.user.username}`);
 								}
@@ -94,6 +98,7 @@ module.exports = {
 									// Kick here
 									try {
 										console.log(`Kicking ${member.user.username} for being inactive.\nLast Active ${moment(mem.lastInteraction).fromNow()}`);
+										await member.kick(`Inactive for too long in ${interaction.guild.name}`);
 									} catch (error) {
 										console.error(`Unable to kick ${member.user.username}`);
 									}
