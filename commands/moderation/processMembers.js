@@ -22,7 +22,7 @@ module.exports = {
 		)
 		.setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
 	options: {
-		devOnly: false,
+		devOnly: true,
 		disabled: false,
 	},
 	async execute(client, interaction) {
@@ -42,14 +42,22 @@ module.exports = {
 		// Grab all the members in the guild
 		const members = await interaction.guild.members.fetch();
 
-		// Filter out the members that are inactive
+		// Filter out the inactive members
+		const timeValue = parseInt(time.slice(0, -1), 10);
+		const timeUnit = time.slice(-1);
+		const unitMap = { d: 'days', w: 'weeks', m: 'months', y: 'years' };
+		const momentUnit = unitMap[timeUnit];
+		const cutoffTime = moment().subtract(timeValue, momentUnit);
 		const inactiveMembers = inactiveUsers.filter((user) => {
-			const timeValue = parseInt(time.slice(0, -1), 10);
-			const timeUnit = time.slice(-1);
-			const duration = moment.duration(timeValue, timeUnit);
-			return moment(user.lastInteraction).isBefore(moment().subtract(duration));
+			const lastInteraction = moment(user.lastInteraction);
+			return lastInteraction.isValid() && lastInteraction.isBefore(cutoffTime);
 		});
+
+		console.log(`Found ${inactiveMembers.length} inactive members.`);
+
 		if (!inactiveMembers.length) return interaction.reply({ content: 'No inactive members found within the timeframe provided.', ephemeral: true });
+
+		return;
 
 		// Create confirmation embed
 		const embed = new EmbedBuilder()
@@ -77,7 +85,9 @@ module.exports = {
 					// Kick the inactive members
 					for await (const mem of inactiveMembers) {
 						const member = members.get(mem.userId);
-						console.log(`Kicking ${member.user.username} for being inactive.\nLast Active ${moment(mem.lastInteraction).fromNow()}`);
+
+						console.log(`Member: ${member.user.username}`);
+						continue;
 
 						// Wait to prevent rate limiting
 						await new Promise((resolve) => setTimeout(resolve, 2500));
@@ -88,7 +98,8 @@ module.exports = {
 						switch (action) {
 							case 'warn':
 								try {
-									await member.send(`You have been inactive for too long in **${interaction.guild.name}** and may be kicked soon.`);
+									console.log(`Warning ${member.user.username} for being inactive.\nLast Active ${moment(mem.lastInteraction).fromNow()}`);
+									// await member.send(`You have been inactive for too long in **${interaction.guild.name}** and may be kicked soon.`);
 								} catch (error) {
 									console.error(`Unable to send warning message to ${member.user.username}`);
 								}
@@ -98,7 +109,7 @@ module.exports = {
 									// Kick here
 									try {
 										console.log(`Kicking ${member.user.username} for being inactive.\nLast Active ${moment(mem.lastInteraction).fromNow()}`);
-										await member.kick(`Inactive for too long in ${interaction.guild.name}`);
+										// await member.kick(`Inactive for too long in ${interaction.guild.name}`);
 									} catch (error) {
 										console.error(`Unable to kick ${member.user.username}`);
 									}
@@ -108,19 +119,19 @@ module.exports = {
 					}
 
 					// Send confirmation message
-					await int.update({ content: `Pruned **${inactiveMembers.length}** members.`, embeds: [] });
+					await interaction.followUp({ content: `Pruned **${inactiveMembers.length}** members.`, embeds: [] });
 					break;
 				case 'cancel':
 					// Send cancellation message
-					await int.update({ content: 'Prune **cancelled**.', embeds: [] });
+					await interaction.followUp({ content: 'Prune **cancelled**.', embeds: [] });
 					break;
 			}
 		});
 
 		// Handle the collector ending
 		collector.on('end', async () => {
-			// Update the embed to remove the buttons
-			await confirmEmbed.edit({ components: [], embeds: [] });
+			const reply = await interaction.fetchReply();
+			await reply.delete();
 		});
 	},
 };

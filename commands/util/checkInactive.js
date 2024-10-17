@@ -39,13 +39,19 @@ module.exports = {
 		const inactiveUsers = await watchedUsers.find({ guildId: interaction.guild.id }).sort({ lastInteraction: 1 });
 		if (!inactiveUsers.length) return interaction.followUp('No inactive users found.');
 
-		// Filter out the members that are inactive
+		// Filter out the inactive members
+		const timeValue = parseInt(time.slice(0, -1), 10);
+		const timeUnit = time.slice(-1);
+		const unitMap = { d: 'days', w: 'weeks', m: 'months', y: 'years' };
+		const momentUnit = unitMap[timeUnit];
+		const cutoffTime = moment().subtract(timeValue, momentUnit);
 		const inactiveMembers = inactiveUsers.filter((user) => {
-			const timeValue = parseInt(time.slice(0, -1), 10);
-			const timeUnit = time.slice(-1);
-			const duration = moment.duration(timeValue, timeUnit);
-			return moment(user.lastInteraction).isBefore(moment().subtract(duration));
+			const lastInteraction = moment(user.lastInteraction);
+			return lastInteraction.isValid() && lastInteraction.isBefore(cutoffTime);
 		});
+
+		console.log(`Found ${inactiveMembers.length} inactive members.`);
+
 		if (!inactiveMembers.length) return interaction.followUp({ content: 'No inactive members found within the timeframe provided.', ephemeral: true });
 
 		// Limit to 10 users
@@ -57,7 +63,7 @@ module.exports = {
 		const embed = new EmbedBuilder()
 			.setTitle(`${interaction.guild.name}'s 10 Most Inactive Members`)
 			.setColor(client.color)
-			.setFooter({ text: `Total Inactive Members: ${inactiveMembers.length.toLocaleString()} / ${totalGuildMembers}` })
+			.setFooter({ text: `Total Inactive Members: ${inactiveMembers.length} / ${totalGuildMembers}` })
 			.setTimestamp()
 			.setDescription(`The following members have been inactive for **${timeString}**`)
 			.addFields({
