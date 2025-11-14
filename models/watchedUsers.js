@@ -5,7 +5,7 @@ const { Schema, model } = require('mongoose');
 const watchedSchema = new Schema({
 	guildId: { type: String, required: true },
 	userId: { type: String, required: true },
-	lastInteraction: { type: Date, required: true },
+	lastInteraction: { type: Number, required: true },
 	lastAction: { type: String, required: true },
 });
 

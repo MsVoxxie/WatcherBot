@@ -12,7 +12,7 @@ async function checkAddUpdate(guild, member, action) {
 		await watchedUsers.create({
 			guildId: guild.id,
 			userId: member.id,
-			lastInteraction: new Date(),
+			lastInteraction: Date.now(),
 			lastAction: action,
 		});
 	}
@@ -25,7 +25,7 @@ async function checkAddUpdate(guild, member, action) {
 				userId: member.id,
 			},
 			{
-				lastInteraction: new Date(),
+				lastInteraction: Date.now(),
 				lastAction: action,
 			}
 		);
