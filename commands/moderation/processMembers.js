@@ -35,34 +35,34 @@ module.exports = {
 		const time = interaction.options.getString('time');
 		const action = interaction.options.getString('action');
 
-		// Fetch inactive members from database
-		const inactiveUsers = await watchedUsers.find({ guildId: interaction.guild.id });
-		if (!inactiveUsers.length) return interaction.reply('No inactive users found.');
-
-		// Grab all the members in the guild
-		const members = await interaction.guild.members.fetch();
-
-		// Filter out the inactive members
+		// Compute cutoff time for inactivity and fetch inactive members directly from DB
 		const timeValue = parseInt(time.slice(0, -1), 10);
 		const timeUnit = time.slice(-1);
 		const unitMap = { d: 'days', w: 'weeks', m: 'months', y: 'years' };
 		const momentUnit = unitMap[timeUnit];
 		const cutoffTime = moment().subtract(timeValue, momentUnit);
-		const inactiveMembers = inactiveUsers.filter((user) => {
-			const lastInteraction = moment(user.lastInteraction);
-			return lastInteraction.isValid() && lastInteraction.isBefore(cutoffTime);
-		});
+		const cutoffMs = cutoffTime.valueOf();
+
+		// Human readable time (e.g. "1 month", "2 weeks")
+		const humanUnitMap = { d: 'day', w: 'week', m: 'month', y: 'year' };
+		const humanTime = `${timeValue} ${humanUnitMap[timeUnit]}${timeValue > 1 ? 's' : ''}`;
+
+		// Grab all the members in the guild
+		const members = await interaction.guild.members.fetch();
+
+		// Query DB for users with lastInteraction older than the cutoff (more efficient and accurate)
+		const inactiveMembers = await watchedUsers.find({ guildId: interaction.guild.id, lastInteraction: { $lt: cutoffMs } }).sort({ lastInteraction: 1 });
 
 		console.log(`Found ${inactiveMembers.length} inactive members.`);
 
 		if (!inactiveMembers.length) return interaction.reply({ content: 'No inactive members found within the timeframe provided.', ephemeral: true });
 
-		return;
-
 		// Create confirmation embed
 		const embed = new EmbedBuilder()
 			.setTitle('Prune Members')
-			.setDescription(`Are you sure you want to ${action === 'warn' ? '__warn__' : '__kick__'} **${inactiveMembers.length}** members for being inactive for **${time}**?`)
+			.setDescription(
+				`Are you sure you want to ***${action === 'warn' ? '__warn__' : '__kick__'}*** **${inactiveMembers.length}** members for being inactive for >**${humanTime}**?`
+			)
 			.setColor(client.color)
 			.setTimestamp();
 
@@ -86,14 +86,13 @@ module.exports = {
 					for await (const mem of inactiveMembers) {
 						const member = members.get(mem.userId);
 
+						// Confirm the member exists
+						if (!member) continue;
+
 						console.log(`Member: ${member.user.username}`);
-						continue;
 
 						// Wait to prevent rate limiting
 						await new Promise((resolve) => setTimeout(resolve, 2500));
-
-						// Confirm the member exists
-						if (!member) continue;
 						// Issue a warning
 						switch (action) {
 							case 'warn':
