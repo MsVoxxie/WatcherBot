@@ -6,6 +6,7 @@ const watchedSchema = new Schema({
 	guildId: { type: String, required: true },
 	userId: { type: String, required: true },
 	lastInteraction: { type: Number, required: true },
+	lastInteractionLocation: { type: String, required: true },
 	lastAction: { type: String, required: true },
 });
 

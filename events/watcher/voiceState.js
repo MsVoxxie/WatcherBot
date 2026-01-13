@@ -23,14 +23,16 @@ module.exports = {
 
 		// Joined Voice Channel
 		if (!oldState.channelId && newState.channel.id && !oldState.channel && newState.channel) {
+			const channelUrl = `https://discord.com/channels/${guildId}/${newState.channelId}`;
 			// Database Entry
-			await checkAddUpdate(curGuild, member, 'Joined Voice Channel');
+			await checkAddUpdate(curGuild, member, 'Joined Voice Channel', channelUrl);
 		}
 
 		//Left Voice Channel
 		if (oldState.channelId && !newState.channelId && oldState.channel && !newState.channel) {
+			const channelUrl = `https://discord.com/channels/${guildId}/${oldState.channelId}`;
 			// Database Entry
-			await checkAddUpdate(curGuild, member, 'Left Voice Channel');
+			await checkAddUpdate(curGuild, member, 'Left Voice Channel', channelUrl);
 		}
 
 		//Switched Voice Channel
@@ -38,8 +40,9 @@ module.exports = {
 			// False positive check
 			if (oldState.channelId === newState.channelId) return;
 
+			const channelUrl = `https://discord.com/channels/${guildId}/${newState.channelId}`;
 			// Database Entry
-			await checkAddUpdate(curGuild, member, 'Switched Voice Channel');
+			await checkAddUpdate(curGuild, member, 'Switched Voice Channel', channelUrl);
 		}
 	},
 };

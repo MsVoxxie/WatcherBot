@@ -1,6 +1,6 @@
 const watchedUsers = require('../../models/watchedUsers');
 
-async function checkAddUpdate(guild, member, action) {
+async function checkAddUpdate(guild, member, action, location) {
 	// Check if the user is already being watched in the guild
 	const user = await watchedUsers.findOne({
 		guildId: guild.id,
@@ -13,6 +13,7 @@ async function checkAddUpdate(guild, member, action) {
 			guildId: guild.id,
 			userId: member.id,
 			lastInteraction: Date.now(),
+			lastInteractionLocation: location,
 			lastAction: action,
 		});
 	}
@@ -26,6 +27,7 @@ async function checkAddUpdate(guild, member, action) {
 			},
 			{
 				lastInteraction: Date.now(),
+				lastInteractionLocation: location,
 				lastAction: action,
 			}
 		);

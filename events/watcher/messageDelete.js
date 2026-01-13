@@ -8,7 +8,8 @@ module.exports = {
 		// Check if the message author is a bot
 		if (message.author.bot) return;
 
-		// Run the checkAddUpdate function
-		await checkAddUpdate(message.guild, message.member, 'Deleted Message');
+		// Run the checkAddUpdate function (channel URL since message is deleted)
+		const channelUrl = `https://discord.com/channels/${message.guild.id}/${message.channel.id}`;
+		await checkAddUpdate(message.guild, message.member, 'Deleted Message', channelUrl);
 	},
 };

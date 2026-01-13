@@ -9,6 +9,6 @@ module.exports = {
 		if (message.author.bot) return;
 
 		// Run the checkAddUpdate function
-		await checkAddUpdate(newMessage.guild, newMessage.member, 'Updated Message');
+		await checkAddUpdate(newMessage.guild, newMessage.member, 'Updated Message', newMessage.url);
 	},
 };

@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Discord Classes
-const { Client, Collection, GatewayIntentBits } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
 const cron = require('node-cron');
 
 // Define Client
@@ -17,6 +17,7 @@ const client = new Client({
 		GatewayIntentBits.GuildVoiceStates,
 		GatewayIntentBits.GuildMessageReactions,
 	],
+	partials: [Partials.Message, Partials.Reaction, Partials.User],
 	allowedMentions: { parse: [] },
 });
 

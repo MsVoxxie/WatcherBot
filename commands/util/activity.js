@@ -18,8 +18,9 @@ module.exports = {
 		const checkedMember = interaction.guild.members.cache.get(checkedUser.id);
 
 		// Fetch oldest members from database
-		const inactiveUser = await watchedUsers.find({ guildId: interaction.guild.id, userId: checkedUser.id });
+		let inactiveUser = await watchedUsers.find({ guildId: interaction.guild.id, userId: checkedUser.id });
 		if (!inactiveUser.length) return interaction.reply('User has not been tracked yet.');
+		inactiveUser = inactiveUser[0];
 
 		// Create the embed
 		const embed = new EmbedBuilder()
@@ -27,7 +28,11 @@ module.exports = {
 			.setDescription(`${checkedMember ? checkedMember : `<@${checkedUser.id}>`}'s Latest Activity`)
 			.setColor(client.color)
 			.setTimestamp()
-			.addFields({ name: 'Last Interaction', value: dateToRelative(inactiveUser[0].lastInteraction) }, { name: 'Last Action', value: inactiveUser[0].lastAction });
+			.addFields(
+				{ name: 'Last Interaction', value: dateToRelative(inactiveUser.lastInteraction) },
+				{ name: 'Last Action', value: inactiveUser.lastAction },
+				{ name: 'Location', value: inactiveUser.lastInteractionLocation }
+			);
 
 		// Send the embed
 		return interaction.reply({ embeds: [embed] });
